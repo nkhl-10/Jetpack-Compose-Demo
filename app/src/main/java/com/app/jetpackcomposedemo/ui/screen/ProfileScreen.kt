@@ -5,10 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 
 @Composable
-fun ProfileScreen(navController: NavController, userId: Int?) {
-    if (userId != null) {
-        Text("Profile Screen for User ID: $userId")
-    } else {
-        Text("Profile Screen with no User ID")
-    }
+fun ProfileScreen(navController: NavController) {
+
 }
