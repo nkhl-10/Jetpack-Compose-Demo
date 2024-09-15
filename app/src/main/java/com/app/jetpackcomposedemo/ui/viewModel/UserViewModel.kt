@@ -3,6 +3,7 @@ package com.app.jetpackcomposedemo.ui.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.jetpackcomposedemo.model.LoginCredentials
 import com.app.jetpackcomposedemo.model.User
 import com.app.jetpackcomposedemo.remote.api.ApiInterface
 import io.ktor.http.HttpStatusCode
@@ -28,16 +29,21 @@ class UserViewModel(private val api: ApiInterface) : ViewModel() {
         }
     }
 
-    fun createUser(newUser: User) {
-        viewModelScope.launch {
+    suspend fun createUser(newUser: User):Boolean {
             try {
                 val response = api.registerUser(newUser)
                 if (response.status == HttpStatusCode.Created) {
-                    Log.i("TODO", "createUser: User Created ")
+                  return true
                 }
             } catch (e: Exception) {
-                e.printStackTrace()  // Handle the error properly
+                return  false
             }
-        }
+        return false
+
     }
+    suspend fun loginUser(cred: LoginCredentials): User {
+        return api.loginUser(cred) // This would be a suspend function
+    }
+
+
 }

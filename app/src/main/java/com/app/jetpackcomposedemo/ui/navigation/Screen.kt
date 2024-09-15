@@ -6,4 +6,5 @@ enum class Screen {
     PROFILE,
     SPLASH,
     SEARCH,
+    REGISTER
 }

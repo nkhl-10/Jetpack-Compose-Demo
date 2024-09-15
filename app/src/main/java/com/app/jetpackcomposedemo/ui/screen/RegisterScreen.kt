@@ -1,6 +1,5 @@
 package com.app.jetpackcomposedemo.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,15 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,21 +24,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.app.jetpackcomposedemo.model.LoginCredentials
+import com.app.jetpackcomposedemo.model.User
 import com.app.jetpackcomposedemo.remote.api.ApiImpl
 import com.app.jetpackcomposedemo.remote.api.ApiInterface
-import com.app.jetpackcomposedemo.remote.sharedPreferences.USER
-import com.app.jetpackcomposedemo.remote.sharedPreferences.getStringData
-import com.app.jetpackcomposedemo.remote.sharedPreferences.saveBooleanData
-import com.app.jetpackcomposedemo.remote.sharedPreferences.saveStringData
 import com.app.jetpackcomposedemo.ui.navigation.NavigationItem
 import com.app.jetpackcomposedemo.ui.viewModel.UserViewModel
 import kotlinx.coroutines.MainScope
@@ -53,19 +42,20 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navController:NavController) {
+fun RegisterScreen(navController: NavHostController) {
     val userApi: ApiInterface = ApiImpl()
     val viewModel = UserViewModel(userApi)
-    val context = LocalContext.current
 
-    // State variables for the inputs
+
+// State variables for the inputs
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var phoneNo by remember { mutableStateOf("") }
+    var paasword by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var passwordVisible by remember { mutableStateOf(false) }
 
-    // UI Layout for Login Screen
+// UI Layout for Login Screen
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -78,47 +68,59 @@ fun LoginScreen(navController:NavController) {
             modifier = Modifier.fillMaxWidth()
         ) {
 
-            // Username input field
+             OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Name") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorMessage != null && name.isEmpty(),
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email") },
                 modifier = Modifier.fillMaxWidth(),
                 isError = errorMessage != null && email.isEmpty(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                singleLine = true
+            )
 
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = phoneNo,
+                onValueChange = { phoneNo = it },
+                label = { Text("Phone No") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = errorMessage != null && phoneNo.isEmpty(),
+                singleLine = true,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
 
             // Password input field
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = paasword,
+                onValueChange = { paasword = it },
                 label = { Text("Password") },
                 modifier = Modifier.fillMaxWidth(),
-                isError = errorMessage != null && password.isEmpty(),
+                isError = errorMessage != null && paasword.isEmpty(),
                 singleLine = true,
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    val image = if (passwordVisible) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-
-
+                visualTransformation = PasswordVisualTransformation()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            Row(modifier = Modifier.fillMaxWidth(),
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "Create Account", modifier = Modifier.clickable {
-                    navController.navigate(NavigationItem.Register.route)
-                })
+                Text(text = "Create Account")
                 Text(text = "Forget Password")
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -137,26 +139,46 @@ fun LoginScreen(navController:NavController) {
             Button(
                 onClick = {
                     errorMessage = null
-                    if (email.isEmpty() || password.isEmpty()) {
-                        errorMessage = "Please enter both username and password"
+                    if (name.isEmpty() || paasword.isEmpty() || phoneNo.isEmpty() || email.isEmpty()) {
+                        errorMessage = "Please enter details"
                     } else {
                         isLoading = true
                         // Simulate login process
                         MainScope().launch {
                             delay(2000) // Simulate network delay
-                            isLoading = false
-                            val loginData = viewModel.loginUser(LoginCredentials(email, password))
-                                if (loginData != null){
-                                    context.saveBooleanData(USER.UserIsLogged.name,true)
-                                    context.saveStringData(USER.USER_NAME.name,loginData.name)
-                                    context.saveStringData(USER.USER_ID.name,loginData.id)
-                                    navController.navigate(NavigationItem.Home.createRoute(context.getStringData(USER.USER_ID.name,"0").toInt())) {
+                                isLoading = false
+                            val user= User(
+                                email = email,
+                                password = paasword,
+                                name = name,
+                                phoneno = phoneNo,
+                                address = "null",
+                                avatar = "null",
+                                contry = "null",
+                                contry_code = "null",
+                                createdAt = "null",
+                                id = (0..10).random().toString()
+                            )
+
+                            if ( viewModel.createUser(user)){
+                                navController.navigate(NavigationItem.Home.createRoute(123)) {
+                                    popUpTo(NavigationItem.Login.route) { inclusive = true }
+                                }
+                            }else{
+                                isLoading = false
+                                errorMessage = "Invalid credentials"
+                            }
+
+
+
+                              /*  if (viewModel.createUser(user)) {
+                                    navController.navigate(NavigationItem.Home.route) {
                                         popUpTo(NavigationItem.Login.route) { inclusive = true }
                                     }
-                                }else{
+                                } else {
                                     isLoading = false
                                     errorMessage = "Invalid credentials"
-                                }
+                                }*/
 
 
                         }

@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.app.jetpackcomposedemo.remote.sharedPreferences.USER
 import com.app.jetpackcomposedemo.ui.screen.HomeScreen
 import com.app.jetpackcomposedemo.ui.screen.ProfileScreen
+import com.app.jetpackcomposedemo.ui.screen.RegisterScreen
 import com.app.jetpackcomposedemo.ui.screen.SplashScreen
 
 @Composable
@@ -19,7 +21,7 @@ fun AppNavHost(navController: NavHostController, startDestination: String = Navi
             route = NavigationItem.Home.route+  "/{userId}",
             arguments = listOf(navArgument("userId") { type = NavType.IntType })
         ) {
-            val userId = it.arguments?.getInt("userId")
+            val userId = it.arguments?.getInt(USER.USER_ID.name)
             HomeScreen(navController)
         }
 
@@ -28,6 +30,8 @@ fun AppNavHost(navController: NavHostController, startDestination: String = Navi
         composable(NavigationItem.Profile.route+"/{userId}") { ProfileScreen(navController ) }
 
         composable(NavigationItem.Splash.route) { SplashScreen(navController) }
+
+        composable(NavigationItem.Register.route) { RegisterScreen(navController) }
 
 
     }
