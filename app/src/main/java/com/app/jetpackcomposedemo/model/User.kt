@@ -2,10 +2,6 @@ package com.app.jetpackcomposedemo.model
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class UserResponse(
-    val  list :List<User>
-)
 
 @Serializable
 data class User(

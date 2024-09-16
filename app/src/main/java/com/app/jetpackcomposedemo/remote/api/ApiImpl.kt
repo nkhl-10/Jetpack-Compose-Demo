@@ -1,8 +1,9 @@
 package com.app.jetpackcomposedemo.remote.api
 
 import com.app.jetpackcomposedemo.model.LoginCredentials
+import com.app.jetpackcomposedemo.model.Todo
 import com.app.jetpackcomposedemo.model.User
-import com.app.jetpackcomposedemo.model.UserResponse
+import com.app.jetpackcomposedemo.ui.utils.TODO_URL
 import com.app.jetpackcomposedemo.ui.utils.USER_URL
 import io.ktor.client.features.get
 import io.ktor.client.request.get
@@ -30,11 +31,19 @@ class ApiImpl:ApiInterface {
     }
 
     override suspend fun loginUser(cred: LoginCredentials):User {
-        return api.post {
+        return api.get {
             url(USER_URL)
             parameter("email",cred.email)
             parameter("password",cred.password)
         }
+    }
+
+    override suspend fun getTODOs(userId: String):String {
+      /*  return api.post {
+            url(TODO_URL)
+//            parameter("userId",userId)
+        }*/
+        return  api.get(TODO_URL)
     }
 
 

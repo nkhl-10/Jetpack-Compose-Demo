@@ -97,4 +97,6 @@ dependencies {
     implementation ("io.ktor:ktor-client-json-jvm:$ktorVersion")
     implementation ("io.ktor:ktor-client-serialization-jvm:$ktorVersion")
 
+    implementation("com.google.code.gson:gson:2.10.1")
+
 }
